@@ -151,7 +151,7 @@ const IntroPages = () => {
           }} >
 
             <Button btnName={'Register / Sign In'}
-              onClick={() => navigation.replace('Login')}
+              onClick={() => navigation.replace('Language')}
               fontSize={26}
               lineHeight={30}
               allButtonSty={{ paddingVertical: 15, backgroundColor: '#838FB5', width: '80%', alignSelf: 'center' }}

@@ -1,5 +1,6 @@
 export default {
   SplashScreen: 'SplashScreen',
-  LoginScreen: 'HomeScreen',
+  LoginScreen: 'LoginScreen',
+  LanguageScreen: 'LanguageScreen',
   IntroScreen: 'DetailsScreen',
 };

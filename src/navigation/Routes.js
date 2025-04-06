@@ -3,7 +3,7 @@ import React from 'react';
 import {createStaticNavigation, useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {IntroPages, Login, Splash} from '../screens/Index';
+import {IntroPages, Login, Splash,Language} from '../screens/Index';
 
 const RootStack = createNativeStackNavigator({
   screens: {
@@ -21,6 +21,12 @@ const RootStack = createNativeStackNavigator({
     },
     Login: {
       screen: Login,
+      options: {
+        headerShown: false,
+      },
+    },
+    Language: {
+      screen: Language,
       options: {
         headerShown: false,
       },

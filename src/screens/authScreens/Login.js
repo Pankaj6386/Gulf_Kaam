@@ -1,68 +1,125 @@
-import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
-import ImagePath from '../../constant/ImagePath';
-import TextView from '../../components/TextView';
-import { BanglaSvg, EnglishSvg, HindiSvg, KannadaSvg, TamilSvg, TelguSvg } from '../../assets/svgIcons/Index';
-import Colors from '../../styles/Colors';
+import React, { useState,useEffect } from "react";
+import { 
+  View, Text, TouchableOpacity, ImageBackground, StyleSheet 
+} from "react-native";
+import { useNavigation } from '@react-navigation/native';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
+import { AccessToken, LoginManager } from "react-native-fbsdk-next";
+import ImagePath from "../../constant/ImagePath";
+
+// Initialize Google Sign-In
+GoogleSignin.configure({
+  webClientId: "YOUR_GOOGLE_WEB_CLIENT_ID", // Get this from Firebase Console
+});
 
 const Login = () => {
-  const langugae = [{
-    id: 1,
-    langIcon: <EnglishSvg />,
-    title: 'English', code: 'en'
-  },
-  {
-    id: 2,
-    langIcon: <HindiSvg />,
-    title: 'Hindi', code: 'hi'
-  },
-  {
-    id: 3,
-    langIcon: <BanglaSvg />,
-    title: 'Bangla', code: 'bn'
-  },{
-    id: 1,
-    langIcon: <TelguSvg />,
-    title: 'English', code: 'en'
-  },
-  {
-    id: 2,
-    langIcon: <TamilSvg />,
-    title: 'Hindi', code: 'hi'
-  },
-  {
-    id: 3,
-    langIcon: <KannadaSvg />,
-    title: 'Bangla', code: 'bn'
-  }
-  ]
+  const navigation = useNavigation();
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    // GoogleSignin.configure({
+    //   webClientId: '280303258048-k3juuast2jufs7v6hdnc5n6gsn51qr0p.apps.googleusercontent.com',
+    //   offlineAccess: true,
+    // });
+  }, []);
+  // Function for Google Sign-In
+  const googleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const { idToken } = await GoogleSignin.signIn();
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      await auth().signInWithCredential(googleCredential);
+      setMessage("Google Sign-In successful!");
+    } catch (error) {
+      console.log("Google Sign-In Error:", error.message);
+      setMessage("Google Sign-In failed. Try again.");
+    }
+  };
+
+  // Function for Facebook Login
+  const facebookLogin = async () => {
+    try {
+      const result = await LoginManager.logInWithPermissions(["public_profile", "email"]);
+      if (result.isCancelled) {
+        setMessage("Facebook Login cancelled.");
+        return;
+      }
+      const data = await AccessToken.getCurrentAccessToken();
+      if (!data) {
+        setMessage("Facebook authentication failed.");
+        return;
+      }
+      const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
+      await auth().signInWithCredential(facebookCredential);
+      setMessage("Facebook Login successful!");
+    } catch (error) {
+      console.log("Facebook Login Error:", error.message);
+      setMessage("Facebook Login failed. Try again.");
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={ImagePath.splashTopRight}
-        style={{ width: '100%', height: '100%' }}>
-        <View style={{ flex: 1, marginTop: 130, borderTopRightRadius: 28, borderTopLeftRadius: 28, backgroundColor: '#6C789F' }}>
-          <TextView>dsfdsf</TextView>
+    <ImageBackground
+      source={ImagePath.splashTopRight}
+      style={styles.background}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Login / Signup</Text>
 
-          <View style={{justifyContent:'center',flexDirection:'row',flexWrap:'wrap'}}>
-            {langugae?.map(item => {
-              return (
-                <View style={{marginHorizontal:30,alignItems:'center',marginTop:20}}>
-                  <View style={{ backgroundColor: Colors.White, padding: 10, borderRadius: 35, height: 70, width: 70, alignItems: 'center', justifyContent: 'center' }}>
-                    {item?.langIcon}
-                  </View>
-                  <TextView textSty={{fontSize:16,color:Colors.White,}}>{item?.title}</TextView>
-                </View>
-              )
-            })}
-          </View>
+        {/* Google Sign-In */}
+        <TouchableOpacity onPress={googleLogin} style={[styles.button, { backgroundColor: "red" }]}>
+          <Text style={styles.buttonText}>Login with Google</Text>
+        </TouchableOpacity>
 
-        </View>
-      </ImageBackground>
-    </SafeAreaView>
+        {/* Facebook Login */}
+        <TouchableOpacity onPress={facebookLogin} style={[styles.button, { backgroundColor: "blue" }]}>
+          <Text style={styles.buttonText}>Login with Facebook</Text>
+        </TouchableOpacity>
+
+        {message ? <Text style={styles.errorText}>{message}</Text> : null}
+      </View>
+    </ImageBackground>
   );
 };
 
-export default Login;
+// Styles
+const styles = StyleSheet.create({
+  background: {
+    width: '100%', 
+    height: '100%', 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center"
+  },
+  container: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    alignItems: "center"
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10
+  },
+  button: {
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    width: "80%",
+    alignItems: "center"
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold"
+  },
+  errorText: {
+    marginTop: 10,
+    color: "red"
+  }
+});
 
-const styles = StyleSheet.create({});
+export default Login;
